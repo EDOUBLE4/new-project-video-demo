@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { AgentExecutor, Agent } from 'openai-agents/core';
+import { AgentExecutor, Agent } from 'openai-agents';
 import { OpenAI } from 'openai';
 import { supabase } from '@/lib/supabase';
 
