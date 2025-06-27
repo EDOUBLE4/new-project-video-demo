@@ -73,13 +73,6 @@ const agent = new Agent({
 
 import { Agent, run } from 'openai-agents';
 
-// Define the AI Agent
-const agent = new Agent({
-  llm: openai,
-  tools: [searchApartmentsTool],
-  systemMessage: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
-});
-
 export async function POST(request: Request) {
   try {
     const { message } = await request.json();
