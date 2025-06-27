@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
 
   if (!firecrawlApiKey) {
