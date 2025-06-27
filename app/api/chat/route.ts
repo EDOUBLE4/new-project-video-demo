@@ -31,14 +31,6 @@ const searchApartmentsTool = {
         type: 'number',
         description: 'The maximum price for the apartment.',
       },
-    minPrice: {
-        type: 'number',
-        description: 'The minimum price for the apartment.',
-      },
-      maxPrice: {
-        type: 'number',
-        description: 'The maximum price for the apartment.',
-      },
     },
   },
   async execute(args: { size?: string; location?: string; minPrice?: number; maxPrice?: number }) {
