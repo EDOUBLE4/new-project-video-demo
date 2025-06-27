@@ -71,7 +71,14 @@ const agent = new Agent({
   systemMessage: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
 });
 
-const agentExecutor = AgentExecutor.fromAgent(agent);
+import { Agent, run } from 'openai-agents';
+
+// Define the AI Agent
+const agent = new Agent({
+  llm: openai,
+  tools: [searchApartmentsTool],
+  systemMessage: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
+});
 
 export async function POST(request: Request) {
   try {
@@ -81,9 +88,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Message is required.' }, { status: 400 });
     }
 
-    const result = await agentExecutor.chat(message);
+    const result = await run(agent, message);
 
-    return NextResponse.json({ response: result.output });
+    return NextResponse.json({ response: result });
   } catch (error) {
     console.error('Chat API error:', error);
     return NextResponse.json({ error: 'Internal server error.', details: error.message }, { status: 500 });
