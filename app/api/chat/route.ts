@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     // Extract the actual response content from the agent state
     let responseContent = 'No response generated';
     if (result && typeof result === 'object' && 'state' in result) {
-      const state = result.state as any;
+      const state = result.state as { modelResponses?: Array<{ content?: string }> };
       const lastResponse = state.modelResponses?.[state.modelResponses.length - 1];
       responseContent = lastResponse?.content || 'Agent completed but no response content found';
     } else if (typeof result === 'string') {
