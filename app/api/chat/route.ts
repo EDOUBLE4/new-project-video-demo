@@ -62,8 +62,8 @@ export async function POST(request: Request) {
     const result = await run(agent, message);
 
     return NextResponse.json({ response: result });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Chat API error:', error);
-    return NextResponse.json({ error: 'Internal server error.', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error.', details: error instanceof Error ? error.message : 'An unknown error occurred.' }, { status: 500 });
   }
 }
