@@ -74,8 +74,8 @@ export async function GET(_request: Request) { // eslint-disable-line @typescrip
       return NextResponse.json({ message: 'No apartments found to save.' });
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Scraping process failed:', error);
-    return NextResponse.json({ error: 'Internal server error during scraping.', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error during scraping.', details: error instanceof Error ? error.message : 'An unknown error occurred.' }, { status: 500 });
   }
 }
