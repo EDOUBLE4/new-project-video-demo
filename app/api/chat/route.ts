@@ -71,7 +71,7 @@ const agent = new OpenAIAgents.Agent({
   systemMessage: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
 });
 
-import * as OpenAIAgents from 'openai-agents';
+import { Agent, run } from '@openai/agents';
 
 export async function POST(request: Request) {
   try {
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Message is required.' }, { status: 400 });
     }
 
-    const result = await OpenAIAgents.run(agent, message);
+    const result = await run(agent, message);
 
     return NextResponse.json({ response: result });
   } catch (error) {
