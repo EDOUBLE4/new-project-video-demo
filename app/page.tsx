@@ -41,7 +41,19 @@ export default function ChatPage() {
       const data = await response.json();
       console.log('API response data:', data);
       
-      const responseText = typeof data?.response === 'string' ? data.response : 'Invalid response format';
+      // Handle different response formats from OpenAI Agents SDK
+      let responseText = 'No response received';
+      if (typeof data?.response === 'string') {
+        responseText = data.response;
+      } else if (data?.response?.state) {
+        // Extract the last message from the agent state
+        const state = data.response.state;
+        const lastResponse = state.modelResponses?.[state.modelResponses.length - 1];
+        responseText = lastResponse?.content || JSON.stringify(data.response, null, 2);
+      } else {
+        responseText = JSON.stringify(data, null, 2);
+      }
+      
       setMessages(prev => [...(prev || []), { text: responseText, sender: 'agent' }]);
       
     } catch (error: unknown) {

@@ -69,8 +69,18 @@ export async function POST(request: Request) {
     }
 
     const result = await run(agent, message);
+    
+    // Extract the actual response content from the agent state
+    let responseContent = 'No response generated';
+    if (result && typeof result === 'object' && 'state' in result) {
+      const state = result.state as any;
+      const lastResponse = state.modelResponses?.[state.modelResponses.length - 1];
+      responseContent = lastResponse?.content || 'Agent completed but no response content found';
+    } else if (typeof result === 'string') {
+      responseContent = result;
+    }
 
-    return NextResponse.json({ response: result });
+    return NextResponse.json({ response: responseContent });
   } catch (error: unknown) {
     console.error('Chat API error:', error);
     return NextResponse.json({ error: 'Internal server error.', details: error instanceof Error ? error.message : 'An unknown error occurred.' }, { status: 500 });
