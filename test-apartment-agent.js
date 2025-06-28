@@ -1,14 +1,29 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
-import { Agent, run, tool } from '@openai/agents';
-import { z } from 'zod';
+require('dotenv').config({ path: '.env.local' });
+const { Agent, run, tool } = require('@openai/agents');
+const { z } = require('zod');
 
-// Check for required environment variables at module level
-if (!process.env.OPENAI_API_KEY) {
-  console.error('OPENAI_API_KEY environment variable is required');
-}
+console.log('Testing Apartment Search Agent...');
+console.log('OPENAI_API_KEY set:', !!process.env.OPENAI_API_KEY);
+console.log('SUPABASE_URL set:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
 
-// Define the search_apartments tool
+// Mock supabase for testing (since we're not running the full Next.js app)
+const mockSupabase = {
+  from: (table) => ({
+    select: (fields) => ({
+      ilike: (field, pattern) => mockSupabase.from(table).select(fields),
+      gte: (field, value) => mockSupabase.from(table).select(fields),
+      lte: (field, value) => mockSupabase.from(table).select(fields),
+      limit: (count) => ({
+        then: (callback) => callback({ 
+          data: [], 
+          error: { message: 'No apartments table found - this is expected for testing' }
+        })
+      })
+    })
+  })
+};
+
+// Define the search_apartments tool (same as in API)
 const searchApartmentsTool = tool({
   name: 'search_apartments',
   description: 'Searches for available apartments based on size, location, and price.',
@@ -19,7 +34,9 @@ const searchApartmentsTool = tool({
     maxPrice: z.number().nullable().optional().describe('The maximum price for the apartment.'),
   }),
   execute: async (args) => {
-    let query = supabase.from('apartments').select('title, url, description, price, bedrooms, bathrooms, location');
+    console.log('Tool called with args:', args);
+    
+    let query = mockSupabase.from('apartments').select('title, url, description, price, bedrooms, bathrooms, location');
 
     if (args.size) {
       query = query.ilike('bedrooms', `%${args.size.replace('-bedroom', '')}%`);
@@ -49,55 +66,51 @@ const searchApartmentsTool = tool({
   },
 });
 
-// Define the AI Agent
+// Define the AI Agent (same as in API)
 const agent = new Agent({
   name: 'Property Assistant',
   instructions: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
   tools: [searchApartmentsTool],
 });
 
-export async function POST(request: Request) {
+async function testApartmentAgent() {
   try {
-    // Check for required environment variables
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'OPENAI_API_KEY is not configured.' }, { status: 500 });
-    }
-    const { message } = await request.json();
-
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required.' }, { status: 400 });
-    }
-
-    const result = await run(agent, message);
+    console.log('Testing with apartment query...');
+    const result = await run(agent, 'how many apartments in atlanta?');
     
-    // Extract the actual response content from the agent state
-    let responseContent = 'No response generated';
+    console.log('\n=== AGENT RESULT ===');
+    console.log('Result type:', typeof result);
+    console.log('Has state:', 'state' in result);
+    
     if (result && typeof result === 'object' && 'state' in result) {
-      const state = result.state as {
-        _currentStep?: { output?: string };
-        _generatedItems?: Array<{ content?: string; text?: string }>;
-        _modelResponses?: Array<{ content?: string }>;
-      };
+      const state = result.state;
+      console.log('\n=== STATE ANALYSIS ===');
+      console.log('_currentStep:', state._currentStep);
+      console.log('_generatedItems length:', state._generatedItems?.length || 0);
+      console.log('_modelResponses length:', state._modelResponses?.length || 0);
       
-      // Try different paths to get the response content
+      // Extract response using our logic
+      let responseContent = 'No response generated';
       if (state._currentStep?.output) {
         responseContent = state._currentStep.output;
-      } else if (state._generatedItems?.length && state._generatedItems.length > 0) {
+        console.log('✅ Found response in _currentStep.output');
+      } else if (state._generatedItems?.length > 0) {
         const lastItem = state._generatedItems[state._generatedItems.length - 1];
         responseContent = lastItem.content || lastItem.text || 'Generated item found but no content';
-      } else if (state._modelResponses?.length && state._modelResponses.length > 0) {
+        console.log('✅ Found response in _generatedItems');
+      } else if (state._modelResponses?.length > 0) {
         const lastResponse = state._modelResponses[state._modelResponses.length - 1];
         responseContent = lastResponse.content || 'Model response found but no content';
-      } else {
-        responseContent = 'Agent completed but no response content found';
+        console.log('✅ Found response in _modelResponses');
       }
-    } else if (typeof result === 'string') {
-      responseContent = result;
+      
+      console.log('\n=== EXTRACTED RESPONSE ===');
+      console.log(responseContent);
     }
-
-    return NextResponse.json({ response: responseContent });
-  } catch (error: unknown) {
-    console.error('Chat API error:', error);
-    return NextResponse.json({ error: 'Internal server error.', details: error instanceof Error ? error.message : 'An unknown error occurred.' }, { status: 500 });
+    
+  } catch (error) {
+    console.error('Test failed:', error.message);
   }
 }
+
+testApartmentAgent();
