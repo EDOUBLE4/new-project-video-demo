@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { OpenAI } from 'openai';
 import { supabase } from '@/lib/supabase';
-import { Agent, run, FunctionTool } from '@openai/agents';
+import { Agent, run, tool } from '@openai/agents';
+import { z } from 'zod';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -10,31 +11,16 @@ const openai = new OpenAI({
 });
 
 // Define the search_apartments tool
-const searchApartmentsTool = new FunctionTool({
+const searchApartmentsTool = tool({
   name: 'search_apartments',
   description: 'Searches for available apartments based on size, location, and price.',
-  parameters: {
-    type: 'object',
-    properties: {
-      size: {
-        type: 'string',
-        description: 'The size of the apartment (e.g., studio, 1-bedroom, 2-bedroom).',
-      },
-      location: {
-        type: 'string',
-        description: 'The location of the apartment (e.g., city, state, zip code).',
-      },
-      minPrice: {
-        type: 'number',
-        description: 'The minimum price for the apartment.',
-      },
-        maxPrice: {
-        type: 'number',
-        description: 'The maximum price for the apartment.',
-      },
-    },
-  },
-  func: async (args: { size?: string; location?: string; minPrice?: number; maxPrice?: number }) => {
+  parameters: z.object({
+    size: z.string().optional().describe('The size of the apartment (e.g., studio, 1-bedroom, 2-bedroom).'),
+    location: z.string().optional().describe('The location of the apartment (e.g., city, state, zip code).'),
+    minPrice: z.number().optional().describe('The minimum price for the apartment.'),
+    maxPrice: z.number().optional().describe('The maximum price for the apartment.'),
+  }),
+  execute: async (args) => {
     let query = supabase.from('apartments').select('title, url, description, price, bedrooms, bathrooms, location');
 
     if (args.size) {
@@ -67,9 +53,9 @@ const searchApartmentsTool = new FunctionTool({
 
 // Define the AI Agent
 const agent = new Agent({
-  llm: openai,
+  name: 'Property Assistant',
+  instructions: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
   tools: [searchApartmentsTool],
-  systemMessage: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
 });
 
 export async function POST(request: Request) {
