@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { OpenAI } from 'openai';
 import { supabase } from '@/lib/supabase';
+import { Agent, run } from '@openai/agents';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -27,7 +28,7 @@ const searchApartmentsTool = {
         type: 'number',
         description: 'The minimum price for the apartment.',
       },
-      maxPrice: {
+        maxPrice: {
         type: 'number',
         description: 'The maximum price for the apartment.',
       },
@@ -69,8 +70,6 @@ const agent = new OpenAIAgents.Agent({
   llm: openai,
   tools: [searchApartmentsTool],
   systemMessage: 'You are an AI assistant for a property management company. Your goal is to help users find available apartments. Use the search_apartments tool to find listings based on user criteria. If you cannot find an apartment, suggest broadening the search.',
-import { Agent, run } from '@openai/agents';
-
 });
 
 export async function POST(request: Request) {
