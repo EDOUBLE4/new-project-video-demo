@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { OpenAI } from 'openai';
 import { supabase } from '@/lib/supabase';
-import { Agent, run } from '@openai/agents';
+import { Agent, run, FunctionTool } from '@openai/agents';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -10,7 +10,7 @@ const openai = new OpenAI({
 });
 
 // Define the search_apartments tool
-const searchApartmentsTool = {
+const searchApartmentsTool = new FunctionTool({
   name: 'search_apartments',
   description: 'Searches for available apartments based on size, location, and price.',
   parameters: {
@@ -34,7 +34,7 @@ const searchApartmentsTool = {
       },
     },
   },
-  async execute(args: { size?: string; location?: string; minPrice?: number; maxPrice?: number }) {
+  func: async (args: { size?: string; location?: string; minPrice?: number; maxPrice?: number }) => {
     let query = supabase.from('apartments').select('title, url, description, price, bedrooms, bathrooms, location');
 
     if (args.size) {
