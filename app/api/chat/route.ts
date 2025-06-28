@@ -1,14 +1,7 @@
 import { NextResponse } from 'next/server';
-
-import { OpenAI } from 'openai';
 import { supabase } from '@/lib/supabase';
 import { Agent, run, tool } from '@openai/agents';
 import { z } from 'zod';
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Define the search_apartments tool
 const searchApartmentsTool = tool({
