@@ -3,6 +3,11 @@ import { supabase } from '@/app/lib/supabase';
 import { Agent, run, tool } from '@openai/agents';
 import { z } from 'zod';
 
+// Check for required environment variables at module level
+if (!process.env.OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY environment variable is required');
+}
+
 // Define the search_apartments tool
 const searchApartmentsTool = tool({
   name: 'search_apartments',
@@ -33,11 +38,11 @@ const searchApartmentsTool = tool({
 
     if (error) {
       console.error('Error searching apartments:', error);
-      return `Error searching for apartments: ${error.message}`;
+      return `Error searching for apartments: ${error.message}. This might indicate the apartments table doesn't exist yet or needs to be created.`;
     }
 
     if (!data || data.length === 0) {
-      return 'No apartments found matching your criteria.';
+      return 'No apartments found matching your criteria. The database may be empty - you can use the /api/scrape endpoint to populate it with sample data.';
     }
 
     return JSON.stringify(data);
@@ -53,6 +58,10 @@ const agent = new Agent({
 
 export async function POST(request: Request) {
   try {
+    // Check for required environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'OPENAI_API_KEY is not configured.' }, { status: 500 });
+    }
     const { message } = await request.json();
 
     if (!message) {
