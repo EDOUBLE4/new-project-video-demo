@@ -73,9 +73,20 @@ export async function POST(request: Request) {
     // Extract the actual response content from the agent state
     let responseContent = 'No response generated';
     if (result && typeof result === 'object' && 'state' in result) {
-      const state = result.state as { modelResponses?: Array<{ content?: string }> };
-      const lastResponse = state.modelResponses?.[state.modelResponses.length - 1];
-      responseContent = lastResponse?.content || 'Agent completed but no response content found';
+      const state = result.state as any;
+      
+      // Try different paths to get the response content
+      if (state._currentStep?.output) {
+        responseContent = state._currentStep.output;
+      } else if (state._generatedItems?.length > 0) {
+        const lastItem = state._generatedItems[state._generatedItems.length - 1];
+        responseContent = lastItem.content || lastItem.text || 'Generated item found but no content';
+      } else if (state._modelResponses?.length > 0) {
+        const lastResponse = state._modelResponses[state._modelResponses.length - 1];
+        responseContent = lastResponse.content || 'Model response found but no content';
+      } else {
+        responseContent = 'Agent completed but no response content found';
+      }
     } else if (typeof result === 'string') {
       responseContent = result;
     }
