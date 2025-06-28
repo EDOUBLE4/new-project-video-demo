@@ -10,40 +10,45 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSendMessage = async () => {
-    if (input.trim()) {
-      const userMessage = { text: input.trim(), sender: 'user' as const };
-      setMessages((prevMessages) => Array.isArray(prevMessages) ? [...prevMessages, userMessage] : [userMessage]);
+    if (!input.trim()) return;
+    
+    const messageText = input.trim();
+    console.log('Sending message:', messageText);
+    
+    // Add user message
+    try {
+      setMessages(prev => [...(prev || []), { text: messageText, sender: 'user' }]);
       setInput('');
       setLoading(true);
 
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: input }),
-        });
+      console.log('Making API call...');
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: messageText }),
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const responseText = data?.response || 'No response received from agent';
-        setMessages((prevMessages) => Array.isArray(prevMessages) ? [
-          ...prevMessages,
-          { text: responseText, sender: 'agent' },
-        ] : [{ text: responseText, sender: 'agent' }]);
-      } catch (error) {
-        console.error('Error sending message:', error);
-        setMessages((prevMessages) => Array.isArray(prevMessages) ? [
-          ...prevMessages,
-          { text: 'Error: Could not connect to the AI agent.', sender: 'agent' },
-        ] : [{ text: 'Error: Could not connect to the AI agent.', sender: 'agent' }]);
-      } finally {
-        setLoading(false);
+      console.log('API response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
+      console.log('API response data:', data);
+      
+      const responseText = typeof data?.response === 'string' ? data.response : 'Invalid response format';
+      setMessages(prev => [...(prev || []), { text: responseText, sender: 'agent' }]);
+      
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error);
+      setMessages(prev => [...(prev || []), { text: `Error: ${error.message}`, sender: 'agent' }]);
+    } finally {
+      setLoading(false);
     }
   };
 
