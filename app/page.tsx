@@ -44,9 +44,10 @@ export default function ChatPage() {
       const responseText = typeof data?.response === 'string' ? data.response : 'Invalid response format';
       setMessages(prev => [...(prev || []), { text: responseText, sender: 'agent' }]);
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in handleSendMessage:', error);
-      setMessages(prev => [...(prev || []), { text: `Error: ${error.message}`, sender: 'agent' }]);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setMessages(prev => [...(prev || []), { text: `Error: ${errorMessage}`, sender: 'agent' }]);
     } finally {
       setLoading(false);
     }
