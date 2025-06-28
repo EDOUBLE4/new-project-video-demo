@@ -63,7 +63,7 @@ const searchApartmentsTool = new FunctionTool({
 
     return JSON.stringify(data);
   },
-};
+});
 
 // Define the AI Agent
 const agent = new Agent({
