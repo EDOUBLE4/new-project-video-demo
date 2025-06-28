@@ -52,7 +52,7 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, index) => (
           <div
-            key={index}
+            key={`message-${index}`}
             className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
@@ -82,7 +82,7 @@ export default function ChatPage() {
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === 'Enter' && !loading) {
               handleSendMessage();
             }
