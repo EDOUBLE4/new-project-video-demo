@@ -11,8 +11,8 @@ export default function ChatPage() {
 
   const handleSendMessage = async () => {
     if (input.trim()) {
-      const userMessage = { text: input, sender: 'user' as const };
-      setMessages((prevMessages) => [...prevMessages, userMessage]);
+      const userMessage = { text: input.trim(), sender: 'user' as const };
+      setMessages((prevMessages) => Array.isArray(prevMessages) ? [...prevMessages, userMessage] : [userMessage]);
       setInput('');
       setLoading(true);
 
@@ -30,16 +30,17 @@ export default function ChatPage() {
         }
 
         const data = await response.json();
-        setMessages((prevMessages) => [
+        const responseText = data?.response || 'No response received from agent';
+        setMessages((prevMessages) => Array.isArray(prevMessages) ? [
           ...prevMessages,
-          { text: data.response, sender: 'agent' },
-        ]);
+          { text: responseText, sender: 'agent' },
+        ] : [{ text: responseText, sender: 'agent' }]);
       } catch (error) {
         console.error('Error sending message:', error);
-        setMessages((prevMessages) => [
+        setMessages((prevMessages) => Array.isArray(prevMessages) ? [
           ...prevMessages,
           { text: 'Error: Could not connect to the AI agent.', sender: 'agent' },
-        ]);
+        ] : [{ text: 'Error: Could not connect to the AI agent.', sender: 'agent' }]);
       } finally {
         setLoading(false);
       }
