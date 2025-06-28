@@ -8,10 +8,10 @@ const searchApartmentsTool = tool({
   name: 'search_apartments',
   description: 'Searches for available apartments based on size, location, and price.',
   parameters: z.object({
-    size: z.string().optional().describe('The size of the apartment (e.g., studio, 1-bedroom, 2-bedroom).'),
-    location: z.string().optional().describe('The location of the apartment (e.g., city, state, zip code).'),
-    minPrice: z.number().optional().describe('The minimum price for the apartment.'),
-    maxPrice: z.number().optional().describe('The maximum price for the apartment.'),
+    size: z.string().nullable().optional().describe('The size of the apartment (e.g., studio, 1-bedroom, 2-bedroom).'),
+    location: z.string().nullable().optional().describe('The location of the apartment (e.g., city, state, zip code).'),
+    minPrice: z.number().nullable().optional().describe('The minimum price for the apartment.'),
+    maxPrice: z.number().nullable().optional().describe('The maximum price for the apartment.'),
   }),
   execute: async (args) => {
     let query = supabase.from('apartments').select('title, url, description, price, bedrooms, bathrooms, location');
