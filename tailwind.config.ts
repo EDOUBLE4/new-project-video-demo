@@ -10,10 +10,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#2563EB',
-        success: '#10B981',
-        danger: '#EF4444',
-        warning: '#F59E0B',
+        primary: {
+          DEFAULT: '#2563EB',
+        },
+        success: {
+          DEFAULT: '#10B981',
+        },
+        danger: {
+          DEFAULT: '#EF4444',
+        },
+        warning: {
+          DEFAULT: '#F59E0B',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

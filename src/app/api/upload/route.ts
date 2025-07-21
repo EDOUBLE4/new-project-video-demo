@@ -112,6 +112,41 @@ export async function POST(req: NextRequest) {
         },
       })
 
+      // In development/mock mode, automatically trigger webhook after a delay
+      if (process.env.USE_MOCK_VECTORIZE === 'true' || process.env.NODE_ENV === 'development') {
+        setTimeout(async () => {
+          try {
+            // Get mock extraction data
+            const { MockVectorizeService } = await import('@/lib/ai/vectorize-mock')
+            const mockStatus = await MockVectorizeService.getExtractionStatus(extractionResult.data as string)
+            
+            if (mockStatus.status === 'completed') {
+              const webhookData = {
+                jobId: extractionResult.data,
+                status: 'completed',
+                extraction: MockVectorizeService.transformToVectorizeFormat(mockStatus.extraction),
+                confidence: mockStatus.confidence,
+              }
+
+              // Call our own webhook endpoint
+              const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/webhooks/vectorize`
+              await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-vectorize-signature': process.env.VECTORIZE_WEBHOOK_SECRET || 'dev-secret',
+                },
+                body: JSON.stringify(webhookData),
+              })
+              
+              console.log('Mock webhook triggered for job:', extractionResult.data)
+            }
+          } catch (error) {
+            console.error('Failed to trigger mock webhook:', error)
+          }
+        }, 2000) // Wait 2 seconds to simulate async processing
+      }
+
       return NextResponse.json({
         success: true,
         certificateId: certificate.id,

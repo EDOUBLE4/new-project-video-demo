@@ -6,8 +6,9 @@ import { COIUpload } from '@/components/coi-upload'
 export default async function VendorPortalPage({
   params,
 }: {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }) {
+  const { token } = await params
   const supabase = createAdminClient()
 
   // Validate token and get vendor info
@@ -17,7 +18,7 @@ export default async function VendorPortalPage({
       *,
       vendor:vendors(*)
     `)
-    .eq('token', params.token)
+    .eq('token', token)
     .single()
 
   if (tokenError || !tokenData) {

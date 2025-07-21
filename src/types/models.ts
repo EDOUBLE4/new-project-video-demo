@@ -55,6 +55,9 @@ export interface Coverage {
   aggregate?: number
   deductible?: number
   perOccurrence?: number
+  combinedSingleLimit?: number
+  eachAccident?: number
+  amount?: number
 }
 
 export interface ComplianceRequirement {

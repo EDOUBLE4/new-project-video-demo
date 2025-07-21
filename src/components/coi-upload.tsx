@@ -70,7 +70,12 @@ export function COIUpload() {
       setTimeout(() => {
         setFiles([])
         setUploadProgress(0)
-        // TODO: Navigate to dashboard or show success message
+        alert('COI uploaded successfully! Processing will complete in a few seconds.')
+        
+        // Refresh the page after processing completes
+        setTimeout(() => {
+          window.location.reload()
+        }, 3000)
       }, 1000)
       
     } catch (error) {

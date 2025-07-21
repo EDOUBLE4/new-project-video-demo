@@ -116,11 +116,12 @@ export class GapAnalysisEngine {
     if (!coverage) return null
 
     // Try different fields where amount might be stored
+    // Use nullish coalescing to handle 0 values correctly
     const amount = 
-      coverage.limit ||
-      coverage.perOccurrence ||
-      coverage.combinedSingleLimit ||
-      coverage.eachAccident ||
+      coverage.limit ??
+      coverage.perOccurrence ??
+      coverage.combinedSingleLimit ??
+      coverage.eachAccident ??
       coverage.amount
 
     return typeof amount === 'number' ? amount : null

@@ -6,31 +6,42 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:vectorize": "tsx scripts/test-vectorize.ts",
+    "simulate-webhook": "tsx scripts/simulate-webhook.ts"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/supabase-js": "^2.47.10",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.2.0",
     "next": "15.1.0",
+    "openai": "^4.73.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@supabase/supabase-js": "^2.47.10",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "openai": "^4.73.1",
+    "react-dropzone": "^14.2.3",
     "resend": "^4.0.0",
-    "tailwindcss": "^3.4.1",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^2.2.0",
-    "@radix-ui/react-slot": "^1.0.2",
-    "class-variance-authority": "^0.7.0",
-    "react-dropzone": "^14.2.3"
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5",
-    "postcss": "^8",
     "autoprefixer": "^10",
     "eslint": "^8",
-    "eslint-config-next": "15.1.0"
+    "eslint-config-next": "15.1.0",
+    "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.4",
+    "postcss": "^8",
+    "typescript": "^5"
   }
 }

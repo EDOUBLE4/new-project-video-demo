@@ -44,13 +44,13 @@ CREATE TABLE certificates (
     -- Timestamps
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     processed_at TIMESTAMP WITH TIME ZONE,
-    created_by UUID REFERENCES auth.users(id),
-    
-    -- Index for performance
-    INDEX idx_vendor_id (vendor_id),
-    INDEX idx_expires_at (expires_at),
-    INDEX idx_compliance_status (compliance_status)
+    created_by UUID REFERENCES auth.users(id)
 );
+
+-- Create indexes for certificates table
+CREATE INDEX idx_certificates_vendor_id ON certificates(vendor_id);
+CREATE INDEX idx_certificates_expires_at ON certificates(expires_at);
+CREATE INDEX idx_certificates_compliance_status ON certificates(compliance_status);
 
 -- Compliance requirements table (hardcoded initially per MVP rules)
 CREATE TABLE compliance_requirements (
@@ -74,10 +74,11 @@ CREATE TABLE gap_analysis (
     gap_amount DECIMAL(12,2),
     is_compliant BOOLEAN DEFAULT false,
     instruction TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
-    INDEX idx_certificate_id (certificate_id)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Create index for gap_analysis
+CREATE INDEX idx_gap_analysis_certificate_id ON gap_analysis(certificate_id);
 
 -- Compliance events for analytics (per MVP rules)
 CREATE TABLE compliance_events (
@@ -87,11 +88,12 @@ CREATE TABLE compliance_events (
     certificate_id UUID REFERENCES certificates(id),
     event_data JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    created_by UUID REFERENCES auth.users(id),
-    
-    INDEX idx_event_type (event_type),
-    INDEX idx_created_at (created_at)
+    created_by UUID REFERENCES auth.users(id)
 );
+
+-- Create indexes for compliance_events
+CREATE INDEX idx_compliance_events_event_type ON compliance_events(event_type);
+CREATE INDEX idx_compliance_events_created_at ON compliance_events(created_at);
 
 -- Vendor portal access tokens (no login required per MVP)
 CREATE TABLE vendor_access_tokens (
@@ -100,11 +102,12 @@ CREATE TABLE vendor_access_tokens (
     token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
     expires_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '30 days',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    last_used_at TIMESTAMP WITH TIME ZONE,
-    
-    INDEX idx_token (token),
-    INDEX idx_vendor_id (vendor_id)
+    last_used_at TIMESTAMP WITH TIME ZONE
 );
+
+-- Create indexes for vendor_access_tokens
+CREATE INDEX idx_vendor_access_tokens_token ON vendor_access_tokens(token);
+CREATE INDEX idx_vendor_access_tokens_vendor_id ON vendor_access_tokens(vendor_id);
 
 -- Insert default compliance requirements (MVP hardcoded values)
 INSERT INTO compliance_requirements (coverage_type, minimum_amount, required, description) VALUES
