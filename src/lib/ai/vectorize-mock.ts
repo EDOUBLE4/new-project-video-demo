@@ -43,20 +43,16 @@ export class MockVectorizeService {
       coverages: {
         generalLiability: {
           policyNumber: 'GL-2024-12345',
-          limit: 1000000,
-          aggregate: 2000000,
-          perOccurrence: 1000000,
+          limit: 500000, // Below required $1M
+          aggregate: 1000000,
+          perOccurrence: 500000,
         },
         autoLiability: {
           policyNumber: 'AUTO-2024-67890',
-          limit: 1000000,
-          perOccurrence: 1000000,
-        },
-        workersCompensation: {
-          policyNumber: 'WC-2024-11111',
-          limit: 500000,
+          limit: 500000, // Below required $1M
           perOccurrence: 500000,
         },
+        // Missing workers compensation entirely
       },
       additionalInsured: ['Property Management Co LLC'],
       certificateHolder: 'Property Management Co LLC',

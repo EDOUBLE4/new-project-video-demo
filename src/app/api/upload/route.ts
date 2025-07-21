@@ -8,6 +8,8 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const file = formData.get('file') as File
     const vendorId = formData.get('vendorId') as string
+    const vendorName = formData.get('vendorName') as string
+    const vendorEmail = formData.get('vendorEmail') as string
 
     if (!file) {
       return NextResponse.json(
@@ -40,7 +42,8 @@ export async function POST(req: NextRequest) {
       const { data: vendor, error: vendorError } = await supabase
         .from('vendors')
         .insert({
-          name: 'New Vendor',
+          name: vendorName || 'New Vendor',
+          email: vendorEmail || null,
           created_by: null, // TODO: Get from auth
         })
         .select()
